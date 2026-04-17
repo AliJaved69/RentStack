@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('role')->default('admin'); // super_admin, admin
+            $table->foreignId('owner_id')->nullable()->constrained('owners')->onDelete('cascade');
             $table->rememberToken();
             $table->timestamps();
         });
