@@ -1,0 +1,45 @@
+{
+    "exported_at": "2026-11-08T08:27:45+00:00",
+    "version": "1.0",
+    "tables": {
+        "owners": [
+            {
+                "id": 1,
+                "name": "Ali Javed",
+                "contact_info": "m.alijaved69@gmail.com",
+                "created_at": "2026-11-08 08:27:45",
+                "updated_at": "2026-11-08 08:27:45"
+            }
+        ],
+        "users": [
+            {
+                "id": 1,
+                "name": "Ali Javed",
+                "email": "m.alijaved69@gmail.com",
+                "email_verified_at": null,
+                "password": "$2y$12$yMvorWcjjwBajLT\/ZAl4t.vYk2O4TueLx\/X3W5T7KYqCZyBIAA\/4m",
+                "role": "admin",
+                "owner_id": 1,
+                "remember_token": null,
+                "created_at": "2026-11-07 21:04:07",
+                "updated_at": "2026-11-08 08:27:45"
+            }
+        ],
+        "properties": [
+            {
+                "id": 1,
+                "owner_id": 1,
+                "title": "Main Market",
+                "address": "Green Town Sarafa Market",
+                "status": "vacant",
+                "created_at": "2026-11-08 08:27:45",
+                "updated_at": "2026-11-08 08:27:45"
+            }
+        ],
+        "tenants": [],
+        "leases": [],
+        "invoices": [],
+        "payments": [],
+        "ledgers": []
+    }
+}
