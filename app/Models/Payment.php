@@ -9,7 +9,25 @@ class Payment extends Model
 {
     use BelongsToOwner;
 
-    protected $fillable = ['invoice_id', 'amount', 'payment_method', 'payment_date'];
+    protected $fillable = [
+        'invoice_id',
+        'rent_amount',
+        'security_amount',
+        'amount',
+        'payment_method',
+        'payment_date',
+        'notes',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'rent_amount' => 'decimal:2',
+            'security_amount' => 'decimal:2',
+            'amount' => 'decimal:2',
+            'payment_date' => 'date',
+        ];
+    }
 
     public function invoice()
     {

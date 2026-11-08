@@ -18,6 +18,10 @@ class OwnerScope implements Scope
 
             if ($model instanceof \App\Models\Property) {
                 $builder->where('owner_id', $ownerId);
+            } elseif ($model instanceof \App\Models\PropertyUnit) {
+                $builder->whereHas('property', function ($query) use ($ownerId) {
+                    $query->where('owner_id', $ownerId);
+                });
             } elseif ($model instanceof \App\Models\Lease) {
                 $builder->whereHas('property', function ($query) use ($ownerId) {
                     $query->where('owner_id', $ownerId);

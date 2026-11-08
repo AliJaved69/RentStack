@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PropertyController;
+use App\Http\Controllers\PropertyUnitController;
 use App\Http\Controllers\LeaseController;
 use App\Http\Controllers\TenantController;
 use App\Http\Controllers\PaymentController;
@@ -17,6 +18,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('properties/export-bundle', [PropertyController::class, 'exportData'])->name('properties.export-bundle');
     Route::resource('properties', PropertyController::class);
+
+    // Property Units & Portions / Shops routes
+    Route::post('properties/{property}/units', [PropertyUnitController::class, 'store'])->name('properties.units.store');
+    Route::post('units/{unit}/assign', [PropertyUnitController::class, 'assignTenant'])->name('units.assign');
+    Route::put('units/{unit}', [PropertyUnitController::class, 'update'])->name('units.update');
+    Route::delete('units/{unit}', [PropertyUnitController::class, 'destroy'])->name('units.destroy');
 
     Route::get('leases/{lease}/terminate', [LeaseController::class, 'terminate'])->name('leases.terminate');
     Route::post('leases/{lease}/settle', [LeaseController::class, 'settle'])->name('leases.settle');

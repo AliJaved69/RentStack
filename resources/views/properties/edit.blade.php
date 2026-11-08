@@ -1,21 +1,29 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Edit Property') }}: {{ $property->title }}
-        </h2>
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="font-bold text-2xl text-slate-800 leading-tight">
+                    {{ __('Edit Property') }}: {{ $property->title }}
+                </h2>
+                <p class="text-sm text-slate-500 mt-0.5">Update building details, photo, and location</p>
+            </div>
+            <a href="{{ route('properties.show', $property) }}" class="text-sm font-semibold text-slate-600 hover:text-slate-900 transition">
+                ← Back to Details
+            </a>
+        </div>
     </x-slot>
 
-    <div class="py-6 sm:py-12">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
-                <form method="POST" action="{{ route('properties.update', $property) }}" class="space-y-6">
+    <div class="py-8 sm:py-12">
+        <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-sm rounded-2xl border border-slate-200/80 p-6 sm:p-8">
+                <form method="POST" action="{{ route('properties.update', $property) }}" enctype="multipart/form-data" class="space-y-6">
                     @csrf
                     @method('PUT')
 
                     @if(auth()->user()->role === 'super_admin' && count($owners) > 0)
                     <div>
-                        <x-input-label for="owner_id" :value="__('Owner')" class="text-sm font-medium text-gray-700" />
-                        <select name="owner_id" id="owner_id" class="mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-xl shadow-sm py-2.5">
+                        <x-input-label for="owner_id" :value="__('Owner')" class="font-semibold text-slate-700" />
+                        <select name="owner_id" id="owner_id" class="w-full mt-1.5 border-slate-200 focus:border-emerald-500 focus:ring-emerald-500 rounded-xl shadow-xs">
                             @foreach($owners as $owner)
                                 <option value="{{ $owner->id }}" {{ old('owner_id', $property->owner_id) == $owner->id ? 'selected' : '' }}>
                                     {{ $owner->name }}
@@ -27,37 +35,40 @@
                     @endif
 
                     <div>
-                        <x-input-label for="title" :value="__('Property Title')" class="text-sm font-medium text-gray-700" />
-                        <x-text-input id="title" class="block mt-1 w-full rounded-xl py-2.5" type="text" name="title" :value="old('title', $property->title)" required autofocus />
+                        <x-input-label for="title" :value="__('Property / Building Title')" class="font-semibold text-slate-700" />
+                        <x-text-input id="title" class="block mt-1.5 w-full rounded-xl" type="text" name="title" :value="old('title', $property->title)" required autofocus />
                         <x-input-error :messages="$errors->get('title')" class="mt-2" />
                     </div>
 
+                    <!-- Photo Upload -->
                     <div>
-                        <x-input-label for="address" :value="__('Address')" class="text-sm font-medium text-gray-700" />
-                        <textarea id="address" name="address" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-xl shadow-sm" rows="3" required>{{ old('address', $property->address) }}</textarea>
+                        <x-input-label for="image" :value="__('Change Property Photo')" class="font-semibold text-slate-700" />
+                        @if($property->image_url)
+                            <div class="mt-2 mb-3">
+                                <img src="{{ $property->image_url }}" alt="{{ $property->title }}" class="h-40 w-full object-cover rounded-xl border border-slate-200 shadow-xs">
+                                <span class="text-xs text-slate-500 mt-1 block">Current photo shown above. Upload a new photo below to replace it.</span>
+                            </div>
+                        @endif
+                        <input id="image" name="image" type="file" accept="image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer">
+                        <x-input-error :messages="$errors->get('image')" class="mt-2" />
+                    </div>
+
+                    <div>
+                        <x-input-label for="address" :value="__('Address')" class="font-semibold text-slate-700" />
+                        <textarea id="address" name="address" class="block mt-1.5 w-full border-slate-200 focus:border-emerald-500 focus:ring-emerald-500 rounded-xl shadow-xs" rows="3" required>{{ old('address', $property->address) }}</textarea>
                         <x-input-error :messages="$errors->get('address')" class="mt-2" />
                     </div>
 
-                    <div>
-                        <x-input-label for="status" :value="__('Status')" class="text-sm font-medium text-gray-700" />
-                        <select name="status" id="status" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-xl shadow-sm py-2.5">
-                            <option value="vacant" {{ old('status', $property->status) === 'vacant' ? 'selected' : '' }}>Vacant</option>
-                            <option value="occupied" {{ old('status', $property->status) === 'occupied' ? 'selected' : '' }}>Occupied</option>
-                        </select>
-                        <x-input-error :messages="$errors->get('status')" class="mt-2" />
-                    </div>
+                    <input type="hidden" name="status" value="{{ $property->status }}">
 
-                    <div class="flex items-center justify-between pt-4 border-t border-gray-100">
-                        <a href="{{ route('properties.index') }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition">
-                            Cancel
-                        </a>
-                        <x-primary-button class="rounded-xl px-6 py-2.5 shadow-md shadow-indigo-100">
-                            {{ __('Update Property') }}
+                    <div class="pt-4 flex items-center justify-between border-t border-slate-100">
+                        <x-primary-button class="bg-emerald-600 hover:bg-emerald-700 py-2.5 px-6 rounded-xl font-semibold shadow-xs">
+                            {{ __('Save Changes') }}
                         </x-primary-button>
+                        <a href="{{ route('properties.show', $property) }}" class="text-sm font-semibold text-slate-500 hover:text-slate-700">Cancel</a>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 </x-app-layout>
-
