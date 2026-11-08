@@ -1,10 +1,23 @@
 -- ====================================================================
--- RentStack Exact Schema for Supabase PostgreSQL
--- Run this in your Supabase Dashboard: SQL Editor -> New Query -> Run
+-- RentStack: Fresh Clean & Setup Script for Supabase PostgreSQL
+-- Copy and paste this ENTIRE script into Supabase SQL Editor and click RUN
 -- ====================================================================
 
--- 1. Owners Table
-CREATE TABLE IF NOT EXISTS public.owners (
+-- STEP 1: Safely drop all existing tables (will NOT error if any table doesn't exist)
+DROP TABLE IF EXISTS public.payments CASCADE;
+DROP TABLE IF EXISTS public.invoices CASCADE;
+DROP TABLE IF EXISTS public.leases CASCADE;
+DROP TABLE IF EXISTS public.property_units CASCADE;
+DROP TABLE IF EXISTS public.tenants CASCADE;
+DROP TABLE IF EXISTS public.properties CASCADE;
+DROP TABLE IF EXISTS public.users CASCADE;
+DROP TABLE IF EXISTS public.owners CASCADE;
+DROP TABLE IF EXISTS public.ledgers CASCADE;
+
+-- STEP 2: Create fresh, clean tables matching the app exactly
+
+-- 1. Owners
+CREATE TABLE public.owners (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     contact_info TEXT NULL,
@@ -12,8 +25,8 @@ CREATE TABLE IF NOT EXISTS public.owners (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
 
--- 2. Users Table
-CREATE TABLE IF NOT EXISTS public.users (
+-- 2. Users
+CREATE TABLE public.users (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -26,8 +39,8 @@ CREATE TABLE IF NOT EXISTS public.users (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
 
--- 3. Properties Table
-CREATE TABLE IF NOT EXISTS public.properties (
+-- 3. Properties (Buildings & Plazas)
+CREATE TABLE public.properties (
     id BIGSERIAL PRIMARY KEY,
     owner_id BIGINT NOT NULL REFERENCES public.owners(id) ON DELETE CASCADE,
     title VARCHAR(255) NOT NULL,
@@ -38,16 +51,8 @@ CREATE TABLE IF NOT EXISTS public.properties (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
 
--- Ensure image_path exists if table was already created
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='properties' AND column_name='image_path') THEN
-        ALTER TABLE public.properties ADD COLUMN image_path VARCHAR(255) NULL;
-    END IF;
-END $$;
-
 -- 4. Property Units (Portions, Shops, Floors, Flats)
-CREATE TABLE IF NOT EXISTS public.property_units (
+CREATE TABLE public.property_units (
     id BIGSERIAL PRIMARY KEY,
     property_id BIGINT NOT NULL REFERENCES public.properties(id) ON DELETE CASCADE,
     name VARCHAR(255) NOT NULL,
@@ -59,8 +64,8 @@ CREATE TABLE IF NOT EXISTS public.property_units (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
 
--- 5. Tenants Table
-CREATE TABLE IF NOT EXISTS public.tenants (
+-- 5. Tenants
+CREATE TABLE public.tenants (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     phone VARCHAR(255) NOT NULL,
@@ -69,19 +74,8 @@ CREATE TABLE IF NOT EXISTS public.tenants (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
 
--- Ensure cnic_or_id exists if tenants table was created earlier with national_id
-DO $$
-BEGIN
-    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='tenants' AND column_name='national_id') THEN
-        ALTER TABLE public.tenants RENAME COLUMN national_id TO cnic_or_id;
-    END IF;
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='tenants' AND column_name='cnic_or_id') THEN
-        ALTER TABLE public.tenants ADD COLUMN cnic_or_id VARCHAR(50);
-    END IF;
-END $$;
-
--- 6. Leases Table
-CREATE TABLE IF NOT EXISTS public.leases (
+-- 6. Leases
+CREATE TABLE public.leases (
     id BIGSERIAL PRIMARY KEY,
     property_id BIGINT NOT NULL REFERENCES public.properties(id) ON DELETE CASCADE,
     unit_id BIGINT NULL REFERENCES public.property_units(id) ON DELETE SET NULL,
@@ -96,24 +90,8 @@ CREATE TABLE IF NOT EXISTS public.leases (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
 
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='leases' AND column_name='unit_id') THEN
-        ALTER TABLE public.leases ADD COLUMN unit_id BIGINT NULL REFERENCES public.property_units(id) ON DELETE SET NULL;
-    END IF;
-    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='leases' AND column_name='rent_amount') THEN
-        ALTER TABLE public.leases RENAME COLUMN rent_amount TO base_rent;
-    END IF;
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='leases' AND column_name='security_deposit_expected') THEN
-        ALTER TABLE public.leases ADD COLUMN security_deposit_expected NUMERIC(15, 2) DEFAULT 0.00;
-    END IF;
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='leases' AND column_name='security_deposit_paid') THEN
-        ALTER TABLE public.leases ADD COLUMN security_deposit_paid NUMERIC(15, 2) DEFAULT 0.00;
-    END IF;
-END $$;
-
--- 7. Invoices Table
-CREATE TABLE IF NOT EXISTS public.invoices (
+-- 7. Invoices (Monthly Rent Bills with Arrears & Utilities)
+CREATE TABLE public.invoices (
     id BIGSERIAL PRIMARY KEY,
     lease_id BIGINT NOT NULL REFERENCES public.leases(id) ON DELETE CASCADE,
     billing_month DATE NOT NULL,
@@ -130,30 +108,8 @@ CREATE TABLE IF NOT EXISTS public.invoices (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
 
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='invoices' AND column_name='base_rent') THEN
-        ALTER TABLE public.invoices ADD COLUMN base_rent NUMERIC(15, 2) DEFAULT 0.00;
-    END IF;
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='invoices' AND column_name='arrears') THEN
-        ALTER TABLE public.invoices ADD COLUMN arrears NUMERIC(15, 2) DEFAULT 0.00;
-    END IF;
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='invoices' AND column_name='utility_charges') THEN
-        ALTER TABLE public.invoices ADD COLUMN utility_charges NUMERIC(15, 2) DEFAULT 0.00;
-    END IF;
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='invoices' AND column_name='utility_notes') THEN
-        ALTER TABLE public.invoices ADD COLUMN utility_notes VARCHAR(255) NULL;
-    END IF;
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='invoices' AND column_name='security_due') THEN
-        ALTER TABLE public.invoices ADD COLUMN security_due NUMERIC(15, 2) DEFAULT 0.00;
-    END IF;
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='invoices' AND column_name='security_paid') THEN
-        ALTER TABLE public.invoices ADD COLUMN security_paid NUMERIC(15, 2) DEFAULT 0.00;
-    END IF;
-END $$;
-
--- 8. Payments Table
-CREATE TABLE IF NOT EXISTS public.payments (
+-- 8. Payments (Split Rent & Security Collections)
+CREATE TABLE public.payments (
     id BIGSERIAL PRIMARY KEY,
     invoice_id BIGINT NOT NULL REFERENCES public.invoices(id) ON DELETE CASCADE,
     rent_amount NUMERIC(15, 2) NOT NULL DEFAULT 0.00,
@@ -166,21 +122,8 @@ CREATE TABLE IF NOT EXISTS public.payments (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
 
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='payments' AND column_name='rent_amount') THEN
-        ALTER TABLE public.payments ADD COLUMN rent_amount NUMERIC(15, 2) DEFAULT 0.00;
-    END IF;
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='payments' AND column_name='security_amount') THEN
-        ALTER TABLE public.payments ADD COLUMN security_amount NUMERIC(15, 2) DEFAULT 0.00;
-    END IF;
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='payments' AND column_name='notes') THEN
-        ALTER TABLE public.payments ADD COLUMN notes TEXT NULL;
-    END IF;
-END $$;
-
--- 9. Ledgers Table
-CREATE TABLE IF NOT EXISTS public.ledgers (
+-- 9. Ledgers
+CREATE TABLE public.ledgers (
     id BIGSERIAL PRIMARY KEY,
     type VARCHAR(50) NOT NULL CHECK (type IN ('borrowed', 'returned')),
     amount NUMERIC(15, 2) NOT NULL,
@@ -190,6 +133,6 @@ CREATE TABLE IF NOT EXISTS public.ledgers (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
 );
 
--- Grant full API access to authenticated & service_role
-GRANT ALL ON ALL TABLES IN SCHEMA public TO postgres, service_role, anon;
-GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO postgres, service_role, anon;
+-- STEP 3: Grant full permissions to Supabase roles
+GRANT ALL ON ALL TABLES IN SCHEMA public TO postgres, service_role, anon, authenticated;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO postgres, service_role, anon, authenticated;
