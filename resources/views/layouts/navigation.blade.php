@@ -45,14 +45,24 @@
             </div>
 
             <!-- Right: Desktop Sync & Profile -->
-            <div class="hidden md:flex items-center space-x-3">
+            <div class="hidden md:flex items-center space-x-2.5">
+                <form method="POST" action="{{ route('sync.cloud') }}" class="inline">
+                    @csrf
+                    <button type="submit" title="Sync local database with Supabase cloud" class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition shadow-xs active:scale-95">
+                        <svg class="w-3.5 h-3.5 mr-1.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Sync Cloud
+                    </button>
+                </form>
+
                 <form method="POST" action="{{ route('properties.export-bundle') }}" class="inline">
                     @csrf
-                    <button type="submit" title="Sync current laptop database to the APK bundle file" class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition shadow-xs active:scale-95">
+                    <button type="submit" title="Bundle current laptop database into initial_data.json for APK installation" class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 transition shadow-xs active:scale-95">
                         <svg class="w-3.5 h-3.5 mr-1.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                         </svg>
-                        Sync Data to APK
+                        APK Bundle
                     </button>
                 </form>
 
@@ -212,26 +222,46 @@
             @endif
         </div>
 
-        <!-- Sync Button Card (Quick action for laptop setup) -->
-        <div class="py-3">
+        <!-- Sync Actions Card for Mobile -->
+        <div class="py-3 space-y-2">
+            <!-- 1. Supabase Cloud Sync (Two-way) -->
+            <form method="POST" action="{{ route('sync.cloud') }}">
+                @csrf
+                <button type="submit" 
+                        class="w-full flex items-center justify-between p-3.5 rounded-2xl bg-emerald-600 text-white hover:bg-emerald-700 active:scale-[0.99] transition shadow-xs text-left">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-9 h-9 rounded-xl bg-white/20 text-white flex items-center justify-center shrink-0">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-sm font-black">Sync with Cloud (Supabase)</div>
+                            <div class="text-xs text-emerald-100">Download new properties & upload payments</div>
+                        </div>
+                    </div>
+                    <svg class="w-5 h-5 text-emerald-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+            </form>
+
+            <!-- 2. Laptop Preload Bundle for APK -->
             <form method="POST" action="{{ route('properties.export-bundle') }}">
                 @csrf
                 <button type="submit" 
-                        class="w-full flex items-center justify-between p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 hover:bg-emerald-100 active:scale-[0.99] transition shadow-xs text-left">
+                        class="w-full flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 hover:bg-slate-100 active:scale-[0.99] transition shadow-xs text-left">
                     <div class="flex items-center space-x-3">
-                        <div class="w-9 h-9 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="w-8 h-8 rounded-lg bg-slate-200 text-slate-600 flex items-center justify-center shrink-0">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                             </svg>
                         </div>
                         <div>
-                            <div class="text-sm font-bold text-emerald-900">Sync Data to Mobile APK</div>
-                            <div class="text-xs text-emerald-600">Bundle laptop records for APK install</div>
+                            <div class="text-xs font-bold text-slate-800">Preload Bundle for APK</div>
+                            <div class="text-[11px] text-slate-500">Save current database for offline APK installer</div>
                         </div>
                     </div>
-                    <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                    </svg>
                 </button>
             </form>
         </div>

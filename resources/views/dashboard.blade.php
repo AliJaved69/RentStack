@@ -36,6 +36,45 @@
     <div class="py-6 sm:py-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
+            <!-- Welcome Onboarding Card (shown when database is fresh) -->
+            @if($stats['units_count'] == 0)
+                <div class="p-6 sm:p-8 bg-gradient-to-r from-emerald-600 to-teal-700 rounded-3xl text-white shadow-lg space-y-4">
+                    <div>
+                        <span class="px-3 py-1 rounded-full text-xs font-bold bg-white/20 text-white uppercase tracking-wider">
+                            👋 Welcome to RentStack
+                        </span>
+                        <h3 class="text-xl sm:text-2xl font-black mt-2">Let's set up your family properties</h3>
+                        <p class="text-xs sm:text-sm text-emerald-100 max-w-xl mt-1">
+                            Your database is clean and fresh. Follow these 3 simple steps to organize your rental properties and start tracking rents:
+                        </p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                        <div class="bg-white/10 backdrop-blur p-4 rounded-2xl border border-white/20">
+                            <div class="w-8 h-8 rounded-xl bg-white text-emerald-700 font-black flex items-center justify-center text-sm mb-2">1</div>
+                            <div class="font-bold text-sm">Add Property / Building</div>
+                            <p class="text-xs text-emerald-100 mt-1">e.g. Main Market Plaza with a picture.</p>
+                        </div>
+                        <div class="bg-white/10 backdrop-blur p-4 rounded-2xl border border-white/20">
+                            <div class="w-8 h-8 rounded-xl bg-white text-emerald-700 font-black flex items-center justify-center text-sm mb-2">2</div>
+                            <div class="font-bold text-sm">Add Portions & Shops</div>
+                            <p class="text-xs text-emerald-100 mt-1">Divide into portions, shops, or floors.</p>
+                        </div>
+                        <div class="bg-white/10 backdrop-blur p-4 rounded-2xl border border-white/20">
+                            <div class="w-8 h-8 rounded-xl bg-white text-emerald-700 font-black flex items-center justify-center text-sm mb-2">3</div>
+                            <div class="font-bold text-sm">Assign Tenants & Rents</div>
+                            <p class="text-xs text-emerald-100 mt-1">Record tenant phone, rent, and 2x advance.</p>
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <a href="{{ route('properties.create') }}" class="inline-flex items-center px-5 py-3 rounded-2xl bg-white text-emerald-800 font-bold text-sm shadow-md hover:bg-emerald-50 active:scale-95 transition">
+                            + Add Your First Property Now →
+                        </a>
+                    </div>
+                </div>
+            @endif
+
             <!-- 4 KEY FINANCIAL METRICS CARDS -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 

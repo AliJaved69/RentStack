@@ -70,22 +70,43 @@ class SupabaseCommand extends Command
         if ($action === 'pull') {
             $this->info('Pulling central records from Supabase into local database...');
 
+            try {
+                DB::statement('PRAGMA foreign_keys = OFF;');
+            } catch (\Throwable $t) {
+                //
+            }
+
             foreach ($this->tables as $table) {
+                if (!Schema::hasTable($table)) {
+                    continue;
+                }
+
                 $remoteRows = $supabase->getAll($table);
                 if (empty($remoteRows)) {
                     $this->line("  - {$table}: 0 remote records.");
                     continue;
                 }
 
-                $inserted = 0;
+                $synced = 0;
                 foreach ($remoteRows as $row) {
-                    if (DB::table($table)->insertOrIgnore($row)) {
-                        $inserted++;
+                    $row = (array) $row;
+                    if (isset($row['id'])) {
+                        DB::table($table)->updateOrInsert(['id' => $row['id']], $row);
+                        $synced++;
                     }
                 }
 
-                $this->info("  ✅ {$table}: {$inserted} new records imported from Supabase.");
+                $this->info("  ✅ {$table}: {$synced} records updated/imported from Supabase.");
             }
+
+            try {
+                DB::statement('PRAGMA foreign_keys = ON;');
+            } catch (\Throwable $t) {
+                //
+            }
+
+            // Also re-export snapshot to initial_data.json
+            \App\Services\DataSyncService::export();
 
             $this->info('Pull operation complete.');
             return;

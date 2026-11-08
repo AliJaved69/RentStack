@@ -162,6 +162,28 @@ class PropertyController extends Controller
         return back()->with('success', 'All properties, portions, and records have been synced to the mobile APK bundle and Supabase cloud!');
     }
 
+    public function syncCloud(Request $request)
+    {
+        try {
+            $direction = $request->input('direction', 'bidirectional');
+
+            if ($direction === 'pull' || $direction === 'bidirectional') {
+                Artisan::call('supabase:sync pull');
+            }
+
+            if ($direction === 'push' || $direction === 'bidirectional') {
+                Artisan::call('supabase:sync push');
+            }
+
+            DataSyncService::export();
+
+            return back()->with('success', 'Cloud sync completed successfully! Your data is fully synchronized with Supabase.');
+        } catch (\Throwable $e) {
+            Log::error('Cloud sync failed: ' . $e->getMessage());
+            return back()->with('error', 'Cloud sync failed: ' . $e->getMessage());
+        }
+    }
+
     protected function syncToSupabase(): void
     {
         try {
