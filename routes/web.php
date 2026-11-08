@@ -39,4 +39,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+// Fallback direct image route for mobile APK storage (in case Android symlink is inactive)
+Route::get('storage/properties/{filename}', function ($filename) {
+    $path = storage_path('app/public/properties/' . $filename);
+    if (!file_exists($path)) {
+        abort(404);
+    }
+    return response()->file($path);
+})->where('filename', '.*');
+
 require __DIR__ . '/auth.php';

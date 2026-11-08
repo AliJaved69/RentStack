@@ -65,6 +65,17 @@ class DataSyncService
 
             File::put(self::getFilePath(), json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
             
+            // Also bundle local property images into database/data/property_images/ for mobile APK
+            $sourceImgDir = storage_path('app/public/properties');
+            $targetImgDir = base_path('database/data/property_images');
+            if (File::exists($sourceImgDir)) {
+                if (!File::exists($targetImgDir)) {
+                    File::makeDirectory($targetImgDir, 0755, true);
+                }
+                File::cleanDirectory($targetImgDir);
+                File::copyDirectory($sourceImgDir, $targetImgDir);
+            }
+
             return [
                 'success' => true,
                 'counts' => $counts,
@@ -140,6 +151,20 @@ class DataSyncService
                 DB::statement('PRAGMA foreign_keys = ON;');
             } catch (\Throwable $t) {
                 // Ignore
+            }
+
+            // Extract preloaded property images into mobile local storage (storage/app/public/properties/)
+            try {
+                $bundledImgDir = base_path('database/data/property_images');
+                $mobileStorageImgDir = storage_path('app/public/properties');
+                if (File::exists($bundledImgDir)) {
+                    if (!File::exists($mobileStorageImgDir)) {
+                        File::makeDirectory($mobileStorageImgDir, 0755, true);
+                    }
+                    File::copyDirectory($bundledImgDir, $mobileStorageImgDir);
+                }
+            } catch (\Throwable $t) {
+                Log::warning('DataSync image extraction warning: ' . $t->getMessage());
             }
 
             return [

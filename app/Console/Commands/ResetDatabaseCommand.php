@@ -79,9 +79,30 @@ class ResetDatabaseCommand extends Command
             foreach ($files as $file) {
                 Storage::disk('public')->delete($file);
             }
+            if (File::exists(base_path('database/data/property_images'))) {
+                File::cleanDirectory(base_path('database/data/property_images'));
+            }
             $this->line("  ✓ Cleaned uploaded property images");
         } catch (\Throwable $t) {
             //
+        }
+
+        if ($keepUser) {
+            // Re-create owner record for existing users so foreign key references remain valid
+            try {
+                foreach (\App\Models\User::all() as $user) {
+                    $owner = \App\Models\Owner::firstOrCreate(
+                        ['id' => $user->owner_id ?: 1],
+                        ['name' => $user->name, 'contact_info' => $user->email]
+                    );
+                    if ($user->owner_id !== $owner->id) {
+                        $user->update(['owner_id' => $owner->id]);
+                    }
+                }
+                $this->line("  ✓ Maintained owner profile for existing users");
+            } catch (\Throwable $t) {
+                //
+            }
         }
 
         // Re-export clean initial data snapshot for mobile APK

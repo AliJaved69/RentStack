@@ -40,16 +40,43 @@
                         <x-input-error :messages="$errors->get('title')" class="mt-2" />
                     </div>
 
-                    <!-- Photo Upload -->
-                    <div>
+                    <!-- Photo Upload with Mobile Preview -->
+                    <div x-data="{ photoName: null, photoPreview: null }">
                         <x-input-label for="image" :value="__('Change Property Photo')" class="font-semibold text-slate-700" />
+                        
+                        <!-- New Preview (if selected) -->
+                        <div x-show="photoPreview" class="mt-2 mb-3">
+                            <span class="block h-44 rounded-2xl bg-cover bg-center border-2 border-emerald-500 shadow-sm"
+                                  :style="'background-image: url(\'' + photoPreview + '\');'">
+                            </span>
+                            <div class="flex justify-between items-center mt-1.5 px-1">
+                                <span class="text-xs text-emerald-700 font-semibold" x-text="photoName"></span>
+                                <button type="button" @click="photoPreview = null; photoName = null; $refs.editPhotoInput.value = ''" class="text-xs text-rose-600 font-bold hover:underline">
+                                    ✕ Cancel change
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Current Photo (if no new photo chosen yet) -->
                         @if($property->image_url)
-                            <div class="mt-2 mb-3">
-                                <img src="{{ $property->image_url }}" alt="{{ $property->title }}" class="h-40 w-full object-cover rounded-xl border border-slate-200 shadow-xs">
-                                <span class="text-xs text-slate-500 mt-1 block">Current photo shown above. Upload a new photo below to replace it.</span>
+                            <div x-show="!photoPreview" class="mt-2 mb-3">
+                                <img src="{{ $property->image_url }}" alt="{{ $property->title }}" class="h-44 w-full object-cover rounded-2xl border border-slate-200 shadow-xs">
+                                <span class="text-xs text-slate-500 mt-1 block">Current photo shown above (stored on device).</span>
                             </div>
                         @endif
-                        <input id="image" name="image" type="file" accept="image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer">
+
+                        <input id="image" 
+                               name="image" 
+                               x-ref="editPhotoInput"
+                               type="file" 
+                               accept="image/*" 
+                               class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer"
+                               @change="
+                                    photoName = $refs.editPhotoInput.files[0].name;
+                                    const reader = new FileReader();
+                                    reader.onload = (e) => { photoPreview = e.target.result; };
+                                    reader.readAsDataURL($refs.editPhotoInput.files[0]);
+                               ">
                         <x-input-error :messages="$errors->get('image')" class="mt-2" />
                     </div>
 

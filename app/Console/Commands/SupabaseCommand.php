@@ -16,6 +16,7 @@ class SupabaseCommand extends Command
         'owners',
         'users',
         'properties',
+        'property_units',
         'tenants',
         'leases',
         'invoices',
