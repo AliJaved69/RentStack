@@ -31,8 +31,10 @@ class OwnerScope implements Scope
                     $query->where('owner_id', $ownerId);
                 });
             } elseif ($model instanceof \App\Models\Tenant) {
-                $builder->whereHas('leases.property', function ($query) use ($ownerId) {
-                    $query->where('owner_id', $ownerId);
+                $builder->where(function ($query) use ($ownerId) {
+                    $query->whereHas('leases.property', function ($q) use ($ownerId) {
+                        $q->where('owner_id', $ownerId);
+                    })->orDoesntHave('leases');
                 });
             }
         }

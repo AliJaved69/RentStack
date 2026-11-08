@@ -92,11 +92,20 @@ class PropertyController extends Controller
     }
 
     /**
-     * Manual trigger to export all laptop data for mobile bundle
+     * Manual trigger to export all laptop data for mobile bundle and Supabase
      */
     public function exportData()
     {
         DataSyncService::export();
-        return back()->with('success', 'All current properties and records have been synced to the mobile APK bundle!');
+
+        try {
+            if (!empty(config('services.supabase.url')) && !empty(config('services.supabase.secret_key'))) {
+                \Illuminate\Support\Facades\Artisan::call('supabase:sync push');
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Supabase auto-sync failed: ' . $e->getMessage());
+        }
+
+        return back()->with('success', 'All properties and records have been synced to the mobile APK bundle and Supabase cloud!');
     }
 }

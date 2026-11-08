@@ -73,6 +73,9 @@
                         <div class="px-4 py-2 text-xs text-slate-400 border-b border-slate-100">
                             Signed in as <span class="font-semibold text-slate-700">{{ Auth::user()->email }}</span>
                         </div>
+                        <x-dropdown-link :href="url('/admin')">
+                            {{ __('Filament Admin Panel') }}
+                        </x-dropdown-link>
                         <x-dropdown-link :href="route('profile.edit')">
                             {{ __('Profile Settings') }}
                         </x-dropdown-link>
@@ -235,6 +238,20 @@
 
         <!-- Settings & Logout -->
         <div class="py-3 space-y-1">
+            <a href="{{ url('/admin') }}" 
+               class="flex items-center space-x-3 px-3.5 py-3 rounded-xl text-sm font-medium text-emerald-800 bg-emerald-50/60 hover:bg-emerald-50 transition active:scale-[0.98]">
+                <div class="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center shadow-xs">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="font-bold text-emerald-950">{{ __('Filament Admin Panel') }}</div>
+                    <div class="text-[11px] text-emerald-600">Full backend management</div>
+                </div>
+            </a>
+
             <a href="{{ route('profile.edit') }}" 
                class="flex items-center space-x-3 px-3.5 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 transition active:scale-[0.98]">
                 <div class="w-8 h-8 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center">
