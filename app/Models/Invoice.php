@@ -23,6 +23,11 @@ class Invoice extends Model
         'status',
     ];
 
+    protected $appends = [
+        'remaining_balance',
+        'month_name',
+    ];
+
     protected function casts(): array
     {
         return [

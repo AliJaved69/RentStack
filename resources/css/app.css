@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+[x-cloak] {
+    display: none !important;
+}
+
 :root {
     --safe-top: var(--inset-top, env(safe-area-inset-top, 0px));
     --safe-bottom: var(--inset-bottom, env(safe-area-inset-bottom, 0px));

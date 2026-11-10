@@ -22,14 +22,14 @@
             </div>
 
             <!-- Top Actions -->
-            <div class="flex items-center gap-2 w-full sm:w-auto">
+            <div class="flex items-center gap-2 w-full sm:w-auto" x-data>
                 <button type="button" 
-                        @click="$dispatch('open-add-unit-modal')"
+                        @click.stop="$dispatch('open-add-unit-modal')"
                         class="w-full sm:w-auto inline-flex items-center justify-center bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 text-sm font-bold rounded-xl shadow-xs transition active:scale-95">
                     <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
                     </svg>
-                    + Add Portion / Shop
+                    Add Portion / Shop
                 </button>
                 <a href="{{ route('properties.edit', $property) }}" class="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition" title="Edit Building">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -43,7 +43,7 @@
     <!-- Main Container with Alpine state for modals -->
     <div x-data="{ 
             collectModalOpen: false, 
-            addUnitModalOpen: false, 
+            addUnitModalOpen: {{ $errors->hasAny(['name', 'type', 'default_rent']) ? 'true' : 'false' }}, 
             assignModalOpen: false,
             selectedUnit: null,
             selectedInvoice: null,
@@ -57,7 +57,7 @@
                 this.selectedLease = lease;
                 this.selectedInvoice = invoice;
                 this.selectedTenant = tenant;
-                this.rentAmount = invoice ? invoice.remaining_balance : 0;
+                this.rentAmount = invoice ? (invoice.remaining_balance ?? Math.max(0, Number(invoice.amount_due || 0) - Number(invoice.amount_paid || 0))) : 0;
                 this.securityAmount = 0;
                 this.collectModalOpen = true;
             },
@@ -68,9 +68,21 @@
             }
          }" 
          @open-add-unit-modal.window="addUnitModalOpen = true"
+         @keydown.escape.window="collectModalOpen = false; addUnitModalOpen = false; assignModalOpen = false"
          class="py-6 sm:py-10">
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+
+            @if($errors->any())
+                <div class="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl text-xs sm:text-sm space-y-1">
+                    <div class="font-bold">Please check the form inputs:</div>
+                    <ul class="list-disc list-inside space-y-0.5">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
             <!-- WhatsApp Receipt Flash Banner -->
             @if(session('whatsapp_url'))
@@ -150,13 +162,18 @@
             </div>
 
             <!-- Units / Portions / Shops Header -->
-            <div class="flex items-center justify-between">
+            <div class="flex flex-wrap items-center justify-between gap-3">
                 <div>
                     <h3 class="font-extrabold text-xl text-slate-900">
                         {{ __('Portions, Shops & Units') }}
                     </h3>
                     <p class="text-xs text-slate-500">Tap on any portion or shop to enter rent paid by the tenant</p>
                 </div>
+                <button type="button"
+                        @click="addUnitModalOpen = true"
+                        class="inline-flex items-center px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-bold transition active:scale-95">
+                    + Add Another Portion / Shop
+                </button>
             </div>
 
             <!-- UNIT CARDS (WITHOUT PICTURES - PURE RENT INFO) -->
@@ -337,10 +354,10 @@
         <!-- ==================================================================== -->
         <div x-show="collectModalOpen" 
              x-cloak 
-             class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+             @click.self="collectModalOpen = false"
+             class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-start sm:items-center justify-center p-4 pt-10 pb-24 sm:py-6">
             
-            <div @click.outside="collectModalOpen = false" 
-                 class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-100 p-6 sm:p-8 space-y-5 animate-scale-up">
+            <div class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-100 p-6 sm:p-8 space-y-5 animate-scale-up">
 
                 <div class="flex items-start justify-between">
                     <div>
@@ -369,7 +386,7 @@
                     </div>
                     <div class="flex justify-between text-slate-900 font-extrabold text-sm pt-2 border-t border-slate-200">
                         <span>Remaining Balance:</span>
-                        <span class="text-rose-700" x-text="'Rs. ' + Number(selectedInvoice ? selectedInvoice.remaining_balance : 0).toLocaleString()"></span>
+                        <span class="text-rose-700" x-text="'Rs. ' + Number(selectedInvoice ? (selectedInvoice.remaining_balance ?? Math.max(0, Number(selectedInvoice.amount_due || 0) - Number(selectedInvoice.amount_paid || 0))) : 0).toLocaleString()"></span>
                     </div>
                 </div>
 
@@ -454,10 +471,10 @@
         <!-- ==================================================================== -->
         <div x-show="addUnitModalOpen" 
              x-cloak 
-             class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+             @click.self="addUnitModalOpen = false"
+             class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-start sm:items-center justify-center p-4 pt-10 pb-24 sm:py-6">
             
-            <div @click.outside="addUnitModalOpen = false" 
-                 class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-100 p-6 sm:p-8 space-y-5 animate-scale-up">
+            <div class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-100 p-6 sm:p-8 space-y-5 animate-scale-up">
 
                 <div class="flex items-start justify-between">
                     <div>
@@ -529,10 +546,10 @@
         <!-- ==================================================================== -->
         <div x-show="assignModalOpen" 
              x-cloak 
-             class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+             @click.self="assignModalOpen = false"
+             class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-start sm:items-center justify-center p-4 pt-10 pb-24 sm:py-6">
             
-            <div @click.outside="assignModalOpen = false" 
-                 class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-100 p-6 sm:p-8 space-y-5 animate-scale-up">
+            <div class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-100 p-6 sm:p-8 space-y-5 animate-scale-up">
 
                 <div class="flex items-start justify-between">
                     <div>

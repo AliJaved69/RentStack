@@ -1,5 +1,5 @@
 {
-    "exported_at": "2026-11-08T14:10:49+00:00",
+    "exported_at": "2026-11-10T13:01:16+00:00",
     "version": "1.0",
     "tables": {
         "owners": [
@@ -7,8 +7,8 @@
                 "id": 1,
                 "name": "Ali Javed",
                 "contact_info": "m.alijaved69@gmail.com",
-                "created_at": "2026-11-08 14:05:14",
-                "updated_at": "2026-11-08 14:05:14"
+                "created_at": "2026-11-08T14:05:14+00:00",
+                "updated_at": "2026-11-08T14:05:14+00:00"
             }
         ],
         "users": [
@@ -20,9 +20,9 @@
                 "password": "$2y$12$yMvorWcjjwBajLT\/ZAl4t.vYk2O4TueLx\/X3W5T7KYqCZyBIAA\/4m",
                 "role": "admin",
                 "owner_id": 1,
-                "remember_token": null,
-                "created_at": "2026-11-07 21:04:07",
-                "updated_at": "2026-11-08 08:27:45"
+                "remember_token": "n9PiIl3KL34YnTUfp3A6SeAhBktTRVMkQC5j44qgHJRKhiyn6ex6GqJpyktl",
+                "created_at": "2026-11-07T21:04:07+00:00",
+                "updated_at": "2026-11-08T08:27:45+00:00"
             }
         ],
         "properties": [
@@ -32,12 +32,34 @@
                 "title": "Main Market",
                 "address": "Green Town Sarafa Bazaar Market",
                 "status": "occupied",
-                "created_at": "2026-11-08 14:10:49",
-                "updated_at": "2026-11-08 14:10:49",
+                "created_at": "2026-11-08T14:10:49+00:00",
+                "updated_at": "2026-11-08T14:10:49+00:00",
                 "image_path": null
+            },
+            {
+                "id": 2,
+                "owner_id": 1,
+                "title": "Military Accounts",
+                "address": "Military Accounts",
+                "status": "occupied",
+                "created_at": "2026-11-10 12:59:22",
+                "updated_at": "2026-11-10 12:59:22",
+                "image_path": "properties\/yfzbVFdpvHdzdKvgGVgqZUzIYYNyZ518NfZXTmdo.jpg"
             }
         ],
-        "property_units": [],
+        "property_units": [
+            {
+                "id": 1,
+                "property_id": 2,
+                "name": "Upper Portion",
+                "type": "portion",
+                "default_rent": 28000,
+                "status": "vacant",
+                "notes": null,
+                "created_at": "2026-11-10 13:00:34",
+                "updated_at": "2026-11-10 13:00:34"
+            }
+        ],
         "tenants": [],
         "leases": [],
         "invoices": [],

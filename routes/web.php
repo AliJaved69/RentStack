@@ -10,6 +10,9 @@ use App\Http\Controllers\LedgerController;
 use App\Http\Controllers\ProfileController;
 
 Route::get('/', function () {
+    if (auth()->check()) {
+        return redirect()->route('dashboard');
+    }
     return view('welcome');
 });
 
